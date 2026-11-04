@@ -1,4 +1,5 @@
 import { type Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 import { Suspense } from "react";
 import { BlogExplorer } from "@/components/blog/blog-explorer";
 import { PostCard } from "@/components/blog/post-card";
@@ -7,10 +8,12 @@ import { PageHeader } from "@/components/layout/page-header";
 import { type CategorySlug, categorySlugs } from "@/config/categories";
 import { getAllTags, getPosts, getPostsByCategory, toSummary } from "@/lib/content";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Blog",
-  description: "Engineering deep-dives on DevOps, cloud, automation and AI agents.",
-};
+  description:
+    "Engineering deep-dives on DevOps, AWS, Kubernetes, CI/CD, Terraform, observability and OSINT research.",
+  path: "/blog",
+});
 
 export default function BlogPage() {
   const posts = getPosts().map(toSummary);

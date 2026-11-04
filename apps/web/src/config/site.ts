@@ -13,6 +13,14 @@ export const site = {
     linkedin: "https://www.linkedin.com/in/david-rubin-a02029338",
     email: "Drubin877@gmail.com",
   },
+  /** Profiles that identify the same person (JSON-LD `Person.sameAs`). */
+  sameAs: [
+    "https://github.com/Dude775",
+    "https://www.linkedin.com/in/david-rubin-a02029338",
+    "https://system-portfolio.vercel.app",
+  ],
+  jobTitle: "DevOps & Cloud Engineer",
+  locale: "en_US",
 } as const;
 
 export const mainNav = [

@@ -1,0 +1,8 @@
+title: genspark-conversation-toolbox
+slug: genspark-conversation-toolbox
+summary: Chrome extension for Genspark that adds right-to-left support for Hebrew, Arabic and Persian, plus chat export. Detailed stack not mirrored here yet; see the repo.
+stack: [Chrome Extension]
+repo: https://github.com/Dude775/genspark-conversation-toolbox
+portfolio_url: https://system-portfolio.vercel.app
+status: active
+featured: false

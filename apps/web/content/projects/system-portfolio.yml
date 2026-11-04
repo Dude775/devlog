@@ -1,0 +1,9 @@
+title: system-portfolio
+slug: system-portfolio
+summary: My canonical portfolio with the full project case studies, deployed on Vercel. Stack details are not mirrored here yet; see the repo.
+stack: [Vercel]
+repo: https://github.com/Dude775/system-portfolio
+portfolio_url: https://system-portfolio.vercel.app
+live: https://system-portfolio.vercel.app
+status: active
+featured: false

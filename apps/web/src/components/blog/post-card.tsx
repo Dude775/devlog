@@ -38,7 +38,7 @@ export function PostCard({ post, className }: { post: PostSummary; className?: s
         lang={rtl ? "he" : undefined}
         className={cn("mt-2 line-clamp-3 text-sm text-muted", rtl && "font-hebrew")}
       >
-        {post.description}
+        {post.summary}
       </p>
       <div className="mt-auto flex items-end justify-between gap-3 pt-5">
         <ul

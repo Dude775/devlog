@@ -1,4 +1,5 @@
 import { type Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 import { PageHeader } from "@/components/layout/page-header";
 import { buttonVariants } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
@@ -6,7 +7,11 @@ import { ArrowUpRight, GitHubIcon, LinkedInIcon, MailIcon } from "@/components/u
 import { Prose } from "@/components/ui/prose";
 import { site } from "@/config/site";
 
-export const metadata: Metadata = { title: "About", description: `About ${site.name}.` };
+export const metadata: Metadata = pageMetadata({
+  title: "About",
+  description: `${site.name}, ${site.role}. Moving from ERP systems to DevOps, cloud and automation.`,
+  path: "/about",
+});
 
 export default function AboutPage() {
   return (

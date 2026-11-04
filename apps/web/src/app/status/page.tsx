@@ -1,8 +1,14 @@
 import { type Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 import { getApi } from "@/lib/api";
 
 export const dynamic = "force-dynamic";
-export const metadata: Metadata = { title: "Status" };
+export const metadata: Metadata = pageMetadata({
+  title: "Status",
+  description: "Live API health check.",
+  path: "/status",
+  noindex: true,
+});
 
 async function loadHealth() {
   try {

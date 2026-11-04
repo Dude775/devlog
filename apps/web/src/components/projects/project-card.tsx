@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { ArrowUpRight, GitHubIcon } from "@/components/ui/icons";
-import { type PostSummary, portfolioUrlFor } from "@/lib/content";
+import { type PostSummary } from "@/lib/content";
 import { cn } from "@/lib/cn";
 
 export interface ProjectCardProps {
@@ -34,9 +34,10 @@ export function ProjectCard({
           {label}
         </p>
       )}
-      <Heading className={cn("font-mono text-lg font-semibold text-fg", label && "mt-2")}>
-        {project.name}
-      </Heading>
+      <div className={cn("flex items-baseline justify-between gap-3", label && "mt-2")}>
+        <Heading className="font-mono text-lg font-semibold text-fg">{project.title}</Heading>
+        <Badge variant={project.status === "active" ? "accent" : "outline"}>{project.status}</Badge>
+      </div>
       <p className="mt-1.5 text-sm text-muted">{project.summary}</p>
 
       {project.stack.length > 0 && (
@@ -51,7 +52,7 @@ export function ProjectCard({
 
       {posts && posts.length > 0 && (
         <div className="mt-5 border-t border-border pt-4">
-          <p className="font-mono text-xs text-subtle">Writing about {project.name}</p>
+          <p className="font-mono text-xs text-subtle">Writing about {project.title}</p>
           <ul className="mt-2 space-y-1.5">
             {posts.map((p) => (
               <li key={p.slug}>
@@ -79,10 +80,21 @@ export function ProjectCard({
           className="inline-flex items-center gap-1.5 text-muted transition-colors hover:text-fg"
         >
           <GitHubIcon /> Repository
-          <span className="sr-only">for {project.name} (opens in a new tab)</span>
+          <span className="sr-only">for {project.title} (opens in a new tab)</span>
         </a>
+        {project.live && (
+          <a
+            href={project.live}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1 text-muted transition-colors hover:text-fg"
+          >
+            Live <ArrowUpRight />
+            <span className="sr-only">site for {project.title} (opens in a new tab)</span>
+          </a>
+        )}
         <a
-          href={portfolioUrlFor(project)}
+          href={project.portfolio_url}
           target="_blank"
           rel="noopener noreferrer"
           className="inline-flex items-center gap-1 font-medium text-accent-text transition-colors hover:text-fg"

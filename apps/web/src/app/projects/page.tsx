@@ -1,4 +1,5 @@
 import { type Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 import { PageHeader } from "@/components/layout/page-header";
 import { Reveal } from "@/components/motion/reveal";
 import { ProjectCard } from "@/components/projects/project-card";
@@ -7,10 +8,11 @@ import { ArrowUpRight } from "@/components/ui/icons";
 import { site } from "@/config/site";
 import { getPostsByProject, getProjects, toSummary } from "@/lib/content";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Projects",
   description: "Projects I write about. Full case studies live on the portfolio.",
-};
+  path: "/projects",
+});
 
 export default function ProjectsPage() {
   const projects = getProjects();

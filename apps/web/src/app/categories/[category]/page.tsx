@@ -1,4 +1,5 @@
 import { type Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PostCard } from "@/components/blog/post-card";
@@ -22,7 +23,11 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { category } = await params;
   if (!isCategorySlug(category)) return {};
-  return { title: categories[category].title, description: categories[category].description };
+  return pageMetadata({
+    title: categories[category].title,
+    description: categories[category].description,
+    path: `/categories/${category}`,
+  });
 }
 
 export default async function CategoryPage({ params }: Props) {

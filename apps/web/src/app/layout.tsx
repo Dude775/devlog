@@ -4,11 +4,12 @@ import { type ReactNode } from "react";
 import { CommandMenu, type CommandIndex } from "@/components/command/command-menu";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
+import { JsonLd } from "@/components/seo/json-ld";
 import { Providers } from "@/components/providers";
 import { categories } from "@/config/categories";
 import { site } from "@/config/site";
-import { publicEnv } from "@/env";
 import { getPosts, getProjects } from "@/lib/content";
+import { pageMetadata, siteJsonLd, siteUrl } from "@/lib/seo";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" });
@@ -25,9 +26,12 @@ const heebo = Heebo({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(publicEnv.NEXT_PUBLIC_SITE_URL),
+  ...pageMetadata({ description: site.description, path: "/" }),
+  metadataBase: new URL(siteUrl),
   title: { default: `${site.name} | ${site.role}`, template: `%s | ${site.name}` },
-  description: site.description,
+  applicationName: site.title,
+  authors: [{ name: site.name, url: site.portfolioUrl }],
+  creator: site.name,
 };
 
 export const viewport: Viewport = {
@@ -47,7 +51,7 @@ function buildCommandIndex(): CommandIndex {
       dir: p.dir,
     })),
     projects: getProjects().map((p) => ({
-      name: p.name,
+      name: p.title,
       slug: p.slug,
       repo: p.repo,
       summary: p.summary,
@@ -78,6 +82,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           </main>
           <SiteFooter />
           <CommandMenu index={buildCommandIndex()} />
+          <JsonLd data={siteJsonLd()} />
         </Providers>
       </body>
     </html>

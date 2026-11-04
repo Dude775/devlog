@@ -2,19 +2,39 @@
 export const categories = {
   devops: {
     title: "DevOps",
-    description: "CI/CD, containers, monorepos and the plumbing that ships software.",
+    description: "Monorepos, containers, release engineering and the plumbing that ships software.",
   },
-  cloud: {
-    title: "Cloud",
-    description: "AWS architecture, infrastructure as code and cost-aware design.",
+  "cloud-aws": {
+    title: "Cloud / AWS",
+    description: "AWS architecture, networking, IAM and cost-aware design.",
   },
-  "ai-agents": {
-    title: "AI Agents",
-    description: "Building, evaluating and operating LLM-powered agents.",
+  kubernetes: {
+    title: "Kubernetes",
+    description: "Clusters, workloads, Helm and operating containers at scale.",
   },
-  automation: {
-    title: "Automation",
-    description: "Pipelines and scripts that remove toil from real workflows.",
+  "ci-cd": {
+    title: "CI/CD",
+    description: "Pipelines, caching, quality gates and deploy strategies.",
+  },
+  "iac-terraform": {
+    title: "IaC / Terraform",
+    description: "Infrastructure as code: modules, state, drift and reviewable infra changes.",
+  },
+  observability: {
+    title: "Observability",
+    description: "Logs, metrics, traces, health checks and alerting that means something.",
+  },
+  "osint-research": {
+    title: "OSINT Research",
+    description: "Open-source intelligence methodology, verification and AI-assisted research.",
+  },
+  career: {
+    title: "Career",
+    description: "Moving into DevOps: decisions, learning paths and lessons from the switch.",
+  },
+  "build-log": {
+    title: "Build Log",
+    description: "How this site and my other projects are built, decision by decision.",
   },
 } as const;
 

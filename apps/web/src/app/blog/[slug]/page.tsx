@@ -24,6 +24,8 @@ import {
   toSummary,
 } from "@/lib/content";
 import { cn } from "@/lib/cn";
+import { blogPostingJsonLd, postMetadata } from "@/lib/seo";
+import { JsonLd } from "@/components/seo/json-ld";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -37,18 +39,7 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const post = getPost((await params).slug);
-  if (!post) return {};
-  return {
-    title: post.title,
-    description: post.description,
-    alternates: { canonical: post.permalink },
-    openGraph: {
-      type: "article",
-      title: post.title,
-      description: post.description,
-      publishedTime: post.date,
-    },
-  };
+  return post ? postMetadata(post) : {};
 }
 
 export default async function PostPage({ params }: Props) {
@@ -62,6 +53,7 @@ export default async function PostPage({ params }: Props) {
 
   return (
     <>
+      <JsonLd data={blogPostingJsonLd(post)} />
       <ReadingProgress />
       <Container size="wide" className="py-12 sm:py-16">
         <div
@@ -94,7 +86,7 @@ export default async function PostPage({ params }: Props) {
                 <ViewCounter slug={post.slug} rtl={rtl} />
               </div>
               <h1 className="mt-4 text-title font-semibold text-fg">{post.title}</h1>
-              <p className="mt-4 text-lg text-muted">{post.description}</p>
+              <p className="mt-4 text-lg text-muted">{post.summary}</p>
               {post.tags.length > 0 && (
                 <ul className="mt-6 flex flex-wrap gap-1.5" aria-label={t.tags}>
                   {post.tags.map((tag) => (

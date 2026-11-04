@@ -1,13 +1,13 @@
 import { type Post, type Project, posts as allPosts, projects as allProjects } from "#site/content";
 import { type CategorySlug, categories, categorySlugs } from "@/config/categories";
-import { site } from "@/config/site";
 
 /** Serializable post shape for client components (no MDX body). */
 export interface PostSummary {
   slug: string;
   title: string;
-  description: string;
+  summary: string;
   date: string;
+  updated: string | null;
   category: CategorySlug;
   tags: string[];
   dir: "ltr" | "rtl";
@@ -16,27 +16,25 @@ export interface PostSummary {
   project: string | null;
 }
 
+/** Drafts render in `next dev` only; every production surface (pages, sitemap, RSS, OG) drops them. */
+export const showDrafts = process.env.NODE_ENV !== "production";
+
 const published: Post[] = allPosts
-  .filter((p) => process.env.NODE_ENV !== "production" || !p.draft)
+  .filter((p) => showDrafts || !p.draft)
   .sort((a, b) => b.date.localeCompare(a.date));
 
+// Unknown `project:` slugs already fail `velite build` (velite.config.ts `prepare`).
 const sortedProjects: Project[] = [...allProjects].sort(
-  (a, b) => a.order - b.order || a.name.localeCompare(b.name),
+  (a, b) => Number(b.featured) - Number(a.featured) || a.title.localeCompare(b.title),
 );
-
-// Fail the build on dangling `project:` references instead of rendering a broken card.
-for (const post of published) {
-  if (post.project && !sortedProjects.some((p) => p.slug === post.project)) {
-    throw new Error(`Post "${post.slug}" references unknown project "${post.project}"`);
-  }
-}
 
 export function toSummary(post: Post): PostSummary {
   return {
     slug: post.slug,
     title: post.title,
-    description: post.description,
+    summary: post.summary,
     date: post.date,
+    updated: post.updated ?? null,
     category: post.category,
     tags: post.tags,
     dir: post.dir,
@@ -106,8 +104,9 @@ export function getProject(slug: string): Project | undefined {
   return sortedProjects.find((p) => p.slug === slug);
 }
 
-export function portfolioUrlFor(project: Project): string {
-  return project.portfolio ?? site.portfolioUrl;
+/** Last-modified date of a post: `updated` when set, else `date`. */
+export function lastModified(post: Post): string {
+  return post.updated ?? post.date;
 }
 
 export function formatDate(iso: string, locale = "en-US"): string {

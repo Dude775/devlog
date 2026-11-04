@@ -3,6 +3,7 @@ import rehypeSlug from "rehype-slug";
 import { defineCollection, defineConfig, s } from "velite";
 import { categorySlugs } from "./src/config/categories";
 import rehypeCodeMeta from "./src/lib/mdx/rehype-code-meta";
+import rehypeMermaidBlock from "./src/lib/mdx/rehype-mermaid-block";
 
 const prettyCode: PrettyCodeOptions = {
   theme: { dark: "github-dark-dimmed", light: "github-light" },
@@ -18,15 +19,21 @@ const posts = defineCollection({
       title: s.string().max(120),
       slug: s.slug("posts"),
       date: s.isodate(),
-      description: s.string().max(300),
+      /** Last meaningful revision. Feeds `dateModified`, sitemap `lastModified` and RSS. */
+      updated: s.isodate().optional(),
       category: s.enum(categorySlugs),
       tags: s.array(s.string()).default([]),
-      /** Slug of an entry in content/projects. Renders a "Related project" card. */
-      project: s.string().optional(),
+      /** One or two sentences. Used for cards, meta description, OG and RSS. */
+      summary: s.string().max(300),
+      /** Optional cover image, path relative to the MDX file. */
+      cover: s.image().optional(),
       /** Text direction. "rtl" renders the post right-to-left with the Hebrew font. */
       dir: s.enum(["ltr", "rtl"]).default("ltr"),
-      featured: s.boolean().default(false),
+      /** Drafts are rendered in `next dev` only; production builds drop them everywhere. */
       draft: s.boolean().default(false),
+      featured: s.boolean().default(false),
+      /** Slug of an entry in content/projects. Unknown slugs fail the build (see `prepare`). */
+      project: s.string().optional(),
       metadata: s.metadata(),
       toc: s.toc(),
       body: s.mdx(),
@@ -38,15 +45,17 @@ const projects = defineCollection({
   name: "Project",
   pattern: "projects/*.yml",
   schema: s.object({
-    name: s.string().max(60),
+    title: s.string().max(60),
     slug: s.slug("projects"),
-    summary: s.string().max(160),
+    summary: s.string().max(200),
     stack: s.array(s.string()).default([]),
     repo: s.string().url(),
-    /** Case-study URL on the canonical portfolio. Falls back to the portfolio root. */
-    portfolio: s.string().url().optional(),
+    /** Canonical case study on the portfolio (the portfolio owns project detail). */
+    portfolio_url: s.string().url(),
+    /** Public deployment, when one exists. */
+    live: s.string().url().optional(),
+    status: s.enum(["active", "maintained", "archived"]),
     featured: s.boolean().default(false),
-    order: s.number().default(100),
   }),
 });
 
@@ -60,7 +69,18 @@ export default defineConfig({
     clean: true,
   },
   collections: { posts, projects },
+  /** Referential integrity: every `project:` on a post (drafts included) must exist. */
+  prepare({ posts, projects }) {
+    const known = new Set(projects.map((p) => p.slug));
+    const dangling = posts.filter((p) => p.project !== undefined && !known.has(p.project));
+    if (dangling.length > 0) {
+      const list = dangling.map((p) => `  - ${p.slug} -> "${p.project ?? ""}"`).join("\n");
+      throw new Error(
+        `Unknown project slug in post frontmatter:\n${list}\nKnown: ${[...known].join(", ")}`,
+      );
+    }
+  },
   mdx: {
-    rehypePlugins: [rehypeSlug, [rehypePrettyCode, prettyCode], rehypeCodeMeta],
+    rehypePlugins: [rehypeSlug, rehypeMermaidBlock, [rehypePrettyCode, prettyCode], rehypeCodeMeta],
   },
 });
