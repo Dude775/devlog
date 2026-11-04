@@ -1,0 +1,12 @@
+{
+  "extends": "@devlog/config/tsconfig/nextjs.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"],
+      "#site/content": ["./.velite"]
+    }
+  },
+  "include": ["next-env.d.ts", "src", ".next/types/**/*.ts", "*.config.ts"],
+  "exclude": ["node_modules"]
+}
