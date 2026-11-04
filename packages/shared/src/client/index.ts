@@ -60,7 +60,8 @@ export function createApiClient({
   init,
   timeoutMs,
 }: ApiClientOptions) {
-  const root = baseUrl.replace(/\/+$/, "");
+  let root = baseUrl;
+  while (root.endsWith("/")) root = root.slice(0, -1);
 
   async function request<S extends z.ZodType>(
     path: string,
