@@ -1,0 +1,8 @@
+node_modules
+dist
+.next
+.velite
+.turbo
+coverage
+pnpm-lock.yaml
+apps/web/public/static
