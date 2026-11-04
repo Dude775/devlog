@@ -2,10 +2,12 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { type NextConfig } from "next";
 import { PHASE_DEVELOPMENT_SERVER, PHASE_PRODUCTION_BUILD } from "next/constants";
+import { securityHeaders } from "./src/config/security-headers";
+import { publicEnv } from "./src/env";
 
 const monorepoRoot = path.join(path.dirname(fileURLToPath(import.meta.url)), "../..");
 
-const nextConfig: NextConfig = {
+const baseConfig: NextConfig = {
   output: "standalone",
   outputFileTracingRoot: monorepoRoot,
   transpilePackages: ["@devlog/shared"],
@@ -24,5 +26,13 @@ export default async function config(phase: string): Promise<NextConfig> {
     const { build } = await import("velite");
     await build({ watch: isDev, clean: !isDev });
   }
-  return nextConfig;
+  const headers = securityHeaders({
+    apiUrl: publicEnv.NEXT_PUBLIC_API_URL,
+    siteUrl: publicEnv.NEXT_PUBLIC_SITE_URL,
+    isDev,
+  });
+  return {
+    ...baseConfig,
+    headers: () => Promise.resolve([{ source: "/:path*", headers }]),
+  };
 }
