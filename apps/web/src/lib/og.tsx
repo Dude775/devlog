@@ -6,7 +6,7 @@ import { site } from "@/config/site";
  * Shared frame for `next/og` images (satori). Satori cannot read CSS variables, so this
  * mirrors the dark theme tokens from `globals.css`. Keep the two in sync.
  */
-export const ogTheme = {
+const ogTheme = {
   bg: "#08080a",
   surface: "#0f0f12",
   border: "rgba(255,255,255,0.10)",

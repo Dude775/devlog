@@ -15,7 +15,7 @@ export interface SecurityHeaderOptions {
   isDev: boolean;
 }
 
-export function buildContentSecurityPolicy({ apiUrl, siteUrl, isDev }: SecurityHeaderOptions) {
+function buildContentSecurityPolicy({ apiUrl, siteUrl, isDev }: SecurityHeaderOptions) {
   const directives: Record<string, string[]> = {
     "default-src": ["'self'"],
     "script-src": ["'self'", "'unsafe-inline'", ...(isDev ? ["'unsafe-eval'"] : [])],

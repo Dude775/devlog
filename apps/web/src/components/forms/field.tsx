@@ -1,7 +1,7 @@
 import { type InputHTMLAttributes, type TextareaHTMLAttributes } from "react";
 import { cn } from "@/lib/cn";
 
-export const fieldClass =
+const fieldClass =
   "w-full rounded-lg border border-border-strong bg-surface px-3 py-2 text-sm text-fg placeholder:text-subtle transition-colors focus-visible:border-accent focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-ring disabled:opacity-60";
 
 export function Input({ className, ...props }: InputHTMLAttributes<HTMLInputElement>) {

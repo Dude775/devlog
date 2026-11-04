@@ -15,7 +15,7 @@ export function absoluteUrl(path = "/"): string {
 const feed = { "application/rss+xml": [{ url: "/rss.xml", title: `${site.title} RSS` }] };
 
 /** Canonical + feed discovery. Page-level `alternates` replaces the layout's, so always use this. */
-export function alternatesFor(path: string): Metadata["alternates"] {
+function alternatesFor(path: string): Metadata["alternates"] {
   return { canonical: path, types: feed };
 }
 
@@ -82,7 +82,7 @@ export function postMetadata(post: Post): Metadata {
 const personId = absoluteUrl("/#person");
 const websiteId = absoluteUrl("/#website");
 
-export function personJsonLd() {
+function personJsonLd() {
   return {
     "@type": "Person",
     "@id": personId,

@@ -17,7 +17,7 @@ export interface PostSummary {
 }
 
 /** Drafts render in `next dev` only; every production surface (pages, sitemap, RSS, OG) drops them. */
-export const showDrafts = process.env.NODE_ENV !== "production";
+const showDrafts = process.env.NODE_ENV !== "production";
 
 const published: Post[] = allPosts
   .filter((p) => showDrafts || !p.draft)

@@ -47,7 +47,7 @@ export interface RateLimitRules {
   admin: RateLimitRule;
 }
 
-export const defaultRateLimits: RateLimitRules = {
+const defaultRateLimits: RateLimitRules = {
   read: { limit: 120, windowMs: 60_000 },
   engage: { limit: 30, windowMs: 60_000 },
   inbox: { limit: 5, windowMs: 15 * 60_000 },
