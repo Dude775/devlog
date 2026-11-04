@@ -6,6 +6,8 @@ const serverSchema = z.object({
 
 const publicSchema = z.object({
   NEXT_PUBLIC_SITE_URL: z.url().default("http://localhost:3000"),
+  /** Browser-facing API base URL (views, reactions, forms). Must be in the API's WEB_ORIGIN CORS list. */
+  NEXT_PUBLIC_API_URL: z.url().default("http://localhost:4000"),
 });
 
 function parse<S extends z.ZodType>(schema: S, input: Record<string, string | undefined>) {
@@ -17,6 +19,7 @@ function parse<S extends z.ZodType>(schema: S, input: Record<string, string | un
 /** Public env: safe in client bundles. NEXT_PUBLIC_* must be referenced literally to be inlined. */
 export const publicEnv = parse(publicSchema, {
   NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL,
+  NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
 });
 
 /** Server env: import only from server code (see src/lib/api.ts). */

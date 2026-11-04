@@ -2,6 +2,8 @@ import { type Metadata, type Route } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ReadingProgress } from "@/components/blog/reading-progress";
+import { ReactionBar } from "@/components/engagement/reaction-bar";
+import { ViewCounter } from "@/components/engagement/view-counter";
 import { TableOfContents } from "@/components/blog/table-of-contents";
 import { MdxContent } from "@/components/mdx/mdx-content";
 import { ProjectCard } from "@/components/projects/project-card";
@@ -89,6 +91,7 @@ export default async function PostPage({ params }: Props) {
                 <span className="inline-flex items-center gap-1">
                   <ClockIcon width={13} height={13} /> {t.minutes(post.metadata.readingTime)}
                 </span>
+                <ViewCounter slug={post.slug} rtl={rtl} />
               </div>
               <h1 className="mt-4 text-title font-semibold text-fg">{post.title}</h1>
               <p className="mt-4 text-lg text-muted">{post.description}</p>
@@ -117,6 +120,10 @@ export default async function PostPage({ params }: Props) {
             <Prose className="mx-auto mt-10 max-w-3xl border-t border-border pt-10">
               <MdxContent code={post.body} />
             </Prose>
+
+            <div className="mx-auto mt-12 max-w-3xl">
+              <ReactionBar slug={post.slug} rtl={rtl} />
+            </div>
 
             {project && (
               <div className="mx-auto mt-14 max-w-3xl" dir="ltr" lang="en">
