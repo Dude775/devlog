@@ -33,17 +33,25 @@ apps/
     src/config/            site.ts (identity, links, nav), categories.ts (allowed category slugs)
     src/lib/content.ts     Typed queries over velite output; the only place pages read content
     src/lib/api.ts         Server-only typed API client factory
+    src/lib/api-browser.ts Browser API client for client islands (views, reactions, forms)
+    src/components/engagement/  ViewCounter, ReactionBar (render nothing if the API fails)
+    src/components/forms/  NewsletterForm (footer), ContactForm (/contact), honeypot field
     src/env.ts             zod-validated env (publicEnv, getServerEnv)
     velite.config.ts       Content schema
   api/                     Hono API (@devlog/api)
-    src/index.ts           Process entry: env, DB, server, graceful shutdown
-    src/app.ts             HTTP composition root (pure, DI, testable)
+    src/index.ts           Process entry: env, logger, DB, server, graceful shutdown
+    src/migrate.ts         One-shot migration entry (dist/migrate.js, compose `migrate` job)
+    src/wiring.ts          repositories -> services wiring against a real DB
+    src/app.ts             HTTP composition root (pure, DI, testable); middleware order + rate-limit rules
     src/routes/            HTTP only: parse/validate input, call service, shape response
     src/services/          Business logic; no HTTP, no SQL
-    src/repositories/      Data access via Drizzle; no business rules
-    src/db/                Drizzle client + schema
+    src/repositories/      Data access via Drizzle; no business rules (*.integration.test.ts hit Postgres)
+    src/middleware/        request logger, client IP, rate limit, admin auth
+    src/lib/               HttpError + parseInput, pino logger, visitor hash, rate-limit stores
+    src/testing/fakes.ts   In-memory repositories for service/route tests
+    src/db/                Drizzle client, schema, runMigrations()
     src/config/env.ts      zod-validated env (the only place reading process.env)
-    drizzle/               Generated SQL migrations (drizzle-kit)
+    drizzle/               Generated SQL migrations (drizzle-kit), committed
 packages/
   shared/                  @devlog/shared: schemas/, client/
   config/                  @devlog/config: eslint/, tsconfig/, prettier.js
@@ -71,7 +79,10 @@ docs/ARCHITECTURE.md       Diagrams + boundaries
 - **Env:** all env vars go through a zod schema (`apps/api/src/config/env.ts`, `apps/web/src/env.ts`). Never read `process.env` elsewhere. Every new var must be added to the matching `.env.example`.
 - **Naming:** files `kebab-case`; layer suffixes `*.routes.ts`, `*.service.ts`, `*.repository.ts`; tests `*.test.ts` next to the source; React components `PascalCase` exports; zod schemas `camelCaseSchema`, types `PascalCase`.
 - **Imports:** `import { type X }` for types (lint enforced). Web uses `@/` alias.
-- **Errors:** API errors use `apiErrorSchema` shape `{ error: { code, message } }`.
+- **Errors:** API errors use `apiErrorSchema` shape `{ error: { code, message } }`. Throw `HttpError` (or let `parseInput` throw) and `app.onError` renders it; never `c.json` an error by hand.
+- **Privacy:** never persist or log raw IPs. Visitor identity is `VisitorHasher` output only.
+- **Logging:** use `c.get("logger")` (request-scoped pino child with `reqId`), never `console.*` in the API.
+- **Web + API failures:** API-backed widgets render `null` on any failure; forms show a calm fallback with the email address.
 - **Commits:** Conventional Commits (`feat|fix|chore|docs|refactor|test|build|ci|perf(scope): subject`). Scopes: `web`, `api`, `shared`, `config`, `infra`, `ci`, `docs`. Small, single-purpose commits.
 - **Formatting:** Prettier (`pnpm format`). CI fails on unformatted files.
 
@@ -83,11 +94,12 @@ pnpm dev                        # web :3000 + api :4000 (api needs DATABASE_URL,
 pnpm lint | typecheck | test | build
 pnpm format                     # write; format:check in CI
 pnpm --filter @devlog/api db:generate   # create migration from src/db/schema.ts
-pnpm --filter @devlog/api db:migrate    # apply migrations
+pnpm --filter @devlog/api db:migrate    # apply migrations (src/migrate.ts)
+TEST_DATABASE_URL=postgres://... pnpm --filter @devlog/api test   # include Postgres integration tests
 cp infra/.env.example infra/.env && docker compose -f infra/docker-compose.yml --env-file infra/.env up --build
 ```
 
-Docker base image is overridable: `--build-arg NODE_IMAGE=mirror.gcr.io/library/node:20-alpine` (useful when Docker Hub rate-limits).
+Docker base images are overridable via `infra/.env`: `NODE_IMAGE=mirror.gcr.io/library/node:20-alpine`, `POSTGRES_IMAGE=mirror.gcr.io/library/postgres:16-alpine` (useful when Docker Hub rate-limits).
 
 ## How to continue (rules for future sessions)
 

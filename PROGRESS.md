@@ -36,12 +36,23 @@ Portfolio (https://system-portfolio.vercel.app) owns project detail; this site l
 
 ## Phase 3: Backend features
 
-- [ ] Migrations workflow (`drizzle/`), migrate-on-deploy job in compose
-- [ ] Post views counter: `POST /posts/:slug/views`, `GET /posts/:slug/stats`
+- [x] Drizzle schema + committed migration (`drizzle/0000_init.sql`): `post_views`, `post_view_visitors`, `reactions`, `reaction_visitors`, `subscribers`, `contact_messages`
+- [x] Migrate-on-deploy: one-shot `migrate` service in compose (`dist/migrate.js`); `api` waits for `service_completed_successfully`
+- [x] `GET/POST /v1/views/:slug` with unique counting: `HMAC-SHA256(VIEW_HASH_SALT, day|ip|ua)`, raw IP never stored or logged
+- [x] `GET/POST /v1/reactions/:slug` (`fire`, `brain`, `rocket`), one per type per visitor per day
+- [x] `POST /v1/subscribe`, `POST /v1/contact`: zod from `@devlog/shared`, honeypot, 16 KB body cap, no email enumeration
+- [x] `GET /v1/stats` protected by `x-admin-api-key` (`ADMIN_API_KEY`, timing-safe compare; disabled when unset)
+- [x] Consistent `{ error: { code, message } }` via `HttpError` + `app.onError`
+- [x] Per-IP rate limiting with pluggable `RateLimitStore` (in-memory, bounded), CORS restricted to `WEB_ORIGIN`
+- [x] pino structured logging bound to request id (`X-Request-Id` reused or generated), graceful shutdown (drain, close DB + limiter, 10 s hard timeout)
+- [x] Typed client methods in `@devlog/shared/client` (`views`, `reactions`, `subscribe`, `contact`, `stats`) with API error codes
+- [x] Web: view counter + reaction bar on post page, newsletter form in footer, `/contact` page; widgets render nothing when the API is down
+- [x] Tests: service unit tests, route tests via `app.request()` with in-memory fakes, Postgres integration tests for repositories (CI service container)
+- [x] Verified: `docker compose up` runs postgres -> migrate -> api -> web; browser e2e (views, reactions, newsletter, contact) and API-down degradation checked
+- [ ] Double opt-in for subscribers (confirmation email + token; `confirmed` column is ready)
+- [ ] Prune job for `*_visitors` ledgers older than 2 days (indexed on `day`)
+- [ ] Redis `RateLimitStore` when running more than one api instance
 - [ ] Projects endpoint (GitHub repos metadata, cached)
-- [ ] Contact/newsletter endpoint with zod validation and spam protection
-- [ ] Rate limiting, request id propagation, structured JSON logging (pino)
-- [ ] Integration tests against real Postgres (testcontainers or CI service)
 - [ ] OpenAPI spec generated from zod (`@hono/zod-openapi`)
 
 ## Phase 4: Content + SEO
