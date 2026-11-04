@@ -103,6 +103,21 @@ email enumeration).
 `dist/migrate.js`) applies it. Compose runs it as a one-shot `migrate` service; `api` waits for
 `service_completed_successfully`.
 
+## Content and SEO (build time)
+
+```mermaid
+flowchart LR
+    mdx["content/posts/*.mdx<br/>content/projects/*.yml"] --> velite["velite build<br/>schema + prepare()<br/>(unknown project slug = fail)"]
+    velite --> data[(".velite/*.json")]
+    data --> content["src/lib/content.ts<br/>(drops drafts in production)"]
+    content --> pages["pages + generateMetadata<br/>(src/lib/seo.ts)"]
+    content --> seo["sitemap.xml, robots.txt,<br/>rss.xml, opengraph-image"]
+    content --> ld["JSON-LD<br/>WebSite + Person, BlogPosting"]
+```
+
+All SEO routes are statically generated; absolute URLs come from `NEXT_PUBLIC_SITE_URL` at build time.
+OG images are rendered by `next/og` with fonts read from `@fontsource` packages (no network at build).
+
 ## CI/CD flow
 
 ```mermaid

@@ -57,11 +57,21 @@ Portfolio (https://system-portfolio.vercel.app) owns project detail; this site l
 
 ## Phase 4: Content + SEO
 
-- [ ] Post page rendering velite MDX, reading time, TOC, tags pages
-- [ ] Metadata API: per-page OG/Twitter, canonical URLs, JSON-LD (`BlogPosting`, `Person`)
-- [ ] `sitemap.xml`, `robots.txt`, RSS/Atom feed
-- [ ] Dynamic OG images (`next/og`)
-- [ ] First 3 real posts + project case studies
+- [x] Content model (velite): posts `{title, slug, date, updated?, category, tags, summary, cover?, dir, draft, featured, project?}`, projects `{title, slug, stack[], repo, portfolio_url, live?, status, featured, summary}`
+- [x] Referential integrity: unknown `project:` slug on any post (drafts included) fails `velite build` via `prepare` hook
+- [x] Categories: `devops`, `cloud-aws`, `kubernetes`, `ci-cd`, `iac-terraform`, `observability`, `osint-research`, `career`, `build-log`
+- [x] Post page rendering velite MDX with reading time + TOC; fenced ` ```mermaid ` blocks rendered client-side (lazy `mermaid`, theme from tokens, source fallback)
+- [x] Starter content (placeholders removed): "From ERP to DevOps" (career), "Building this blog" (build-log, project devlog, mermaid), Hebrew RTL OSINT methodology skeleton (osint-research)
+- [x] Projects: only confirmed public repos (`devlog`, `system-portfolio`, `genspark-conversation-toolbox`); GitHub user listing API blocked from CI sandbox, so no auto-discovery
+- [x] Metadata API via `src/lib/seo.ts`: per-page title/description, canonical, OG + Twitter, RSS discovery link; `/status` noindex
+- [x] JSON-LD: site-wide `WebSite` + `Person` (`sameAs` GitHub, LinkedIn, portfolio), `BlogPosting` per post
+- [x] `sitemap.xml` (posts with `lastModified`, static pages, non-empty categories), `robots.txt`, RSS 2.0 `/rss.xml` (all static)
+- [x] Dynamic OG images (`next/og`): site default + per post, terminal frame in site design, local fonts (Inter, JetBrains Mono, Heebo), RTL titles laid out word-by-word (satori has no bidi)
+- [x] Drafts hidden in production (pages, sitemap, RSS, OG), visible in `next dev`; verified both
+- [ ] Tags pages (`/tags/[tag]`); today tags filter `/blog?tag=`
+- [ ] Fill the OSINT methodology post (headings only) and add more posts
+- [ ] Verify stack/status for `system-portfolio` and `genspark-conversation-toolbox` from their repos (currently minimal)
+- [ ] Set `NEXT_PUBLIC_SITE_URL` to the production domain at build time (canonical, sitemap, RSS, JSON-LD use it)
 
 ## Phase 5: Hardening + docs
 

@@ -25,13 +25,18 @@ The repo is itself a portfolio piece: architecture, repo hygiene and CI matter a
 ```
 apps/
   web/                     Next.js app (@devlog/web)
-    content/posts/*.mdx    Blog posts (velite "posts"; frontmatter: category, tags, project, dir, featured)
-    content/projects/*.yml Projects (velite "projects"); detail lives on the portfolio
+    content/posts/*.mdx    Blog posts (velite "posts"; frontmatter: title, slug, date, updated?, category, tags,
+                           summary, cover?, dir, draft, featured, project?). Unknown `project` fails the build.
+    content/projects/*.yml Projects (velite "projects": title, slug, stack, repo, portfolio_url, live?, status,
+                           featured, summary). Only real, public repos; never invent URLs or stack.
     src/app/               Routes (RSC by default)
     src/components/ui/     Design system primitives (Button, Card, Badge, Tag, Container, Section, Prose, CodeBlock)
     src/components/*/      Feature components (layout, blog, projects, home, command, mdx, motion)
     src/config/            site.ts (identity, links, nav), categories.ts (allowed category slugs)
-    src/lib/content.ts     Typed queries over velite output; the only place pages read content
+    src/lib/content.ts     Typed queries over velite output; the only place pages read content (drops drafts in prod)
+    src/lib/seo.ts         pageMetadata/postMetadata, canonical + RSS alternates, JSON-LD builders
+    src/lib/og.tsx         next/og frame + local font loading (@fontsource woff); mirrors dark tokens
+    src/app/{sitemap,robots}.ts, rss.xml/route.ts, opengraph-image.tsx   SEO routes (static)
     src/lib/api.ts         Server-only typed API client factory
     src/lib/api-browser.ts Browser API client for client islands (views, reactions, forms)
     src/components/engagement/  ViewCounter, ReactionBar (render nothing if the API fails)
@@ -70,8 +75,9 @@ docs/ARCHITECTURE.md       Diagrams + boundaries
 4. **Dependency injection over singletons.** Factories (`createXService({ deps })`) wired in `apps/api/src/index.ts`; `createApp()` stays pure so tests use `app.request()` with fakes.
 5. **Static content (MDX) is build-time** via velite. Dynamic data (views, likes, comments) is API-backed.
 6. **Portfolio owns project detail.** https://system-portfolio.vercel.app is canonical; this site links out, never duplicates case studies. No `/projects/[slug]`.
-7. **Design tokens only.** Colors come from CSS vars in `globals.css` (`bg`, `surface`, `fg`, `muted`, `accent`, ...); no raw palette colors in components (status tones like the `warn` Callout excepted). Motion must respect `prefers-reduced-motion`.
-8. `@devlog/shared` must stay runtime-agnostic (no Node or DOM-only APIs, no React).
+7. **SEO via helpers.** Pages export metadata through `pageMetadata()` / `postMetadata()` (Next merges metadata shallowly, so partial objects drop OG/canonical). New indexable routes go in `src/app/sitemap.ts`.
+8. **Design tokens only.** Colors come from CSS vars in `globals.css` (`bg`, `surface`, `fg`, `muted`, `accent`, ...); no raw palette colors in components (exceptions: status tones like the `warn` Callout, and `src/lib/og.tsx` which mirrors the dark tokens because satori cannot read CSS vars). Motion must respect `prefers-reduced-motion`.
+9. `@devlog/shared` must stay runtime-agnostic (no Node or DOM-only APIs, no React).
 
 ## Conventions
 
