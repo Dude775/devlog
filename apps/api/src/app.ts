@@ -67,6 +67,29 @@ export interface AppDeps {
 
 const MAX_BODY_BYTES = 16 * 1024;
 
+/**
+ * helmet-equivalent defaults for a JSON-only API: nothing may render, frame or script it.
+ * CORP stays `same-origin`; the web reads the API via CORS fetch, which CORP does not block.
+ */
+const apiSecurityHeaders = secureHeaders({
+  contentSecurityPolicy: {
+    defaultSrc: ["'none'"],
+    frameAncestors: ["'none'"],
+    baseUri: ["'none'"],
+    formAction: ["'none'"],
+  },
+  strictTransportSecurity: "max-age=63072000; includeSubDomains; preload",
+  referrerPolicy: "no-referrer",
+  xFrameOptions: "DENY",
+  permissionsPolicy: {
+    camera: [],
+    microphone: [],
+    geolocation: [],
+    payment: [],
+    usb: [],
+  },
+});
+
 /** Composition root for HTTP. Pure: no env reads, no side effects; trivially testable. */
 export function createApp({
   services,
@@ -83,7 +106,7 @@ export function createApp({
 
   app.use("*", requestId());
   app.use("*", requestLogger(logger));
-  app.use("*", secureHeaders());
+  app.use("*", apiSecurityHeaders);
   app.use(
     "*",
     cors({

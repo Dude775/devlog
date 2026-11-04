@@ -336,6 +336,24 @@ describe("cross-cutting", () => {
     ).toBeNull();
   });
 
+  it("sends hardened security headers on every response", async () => {
+    const { app } = buildApp();
+    for (const path of ["/health", "/v1/does-not-exist"]) {
+      const res = await app.request(path);
+      expect(res.headers.get("content-security-policy")).toBe(
+        "default-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'",
+      );
+      expect(res.headers.get("strict-transport-security")).toBe(
+        "max-age=63072000; includeSubDomains; preload",
+      );
+      expect(res.headers.get("x-content-type-options")).toBe("nosniff");
+      expect(res.headers.get("x-frame-options")).toBe("DENY");
+      expect(res.headers.get("referrer-policy")).toBe("no-referrer");
+      expect(res.headers.get("permissions-policy")).toContain("camera=()");
+      expect(res.headers.get("x-powered-by")).toBeNull();
+    }
+  });
+
   it("propagates an incoming request id and generates one otherwise", async () => {
     const { app } = buildApp();
     const echoed = await app.request("/health", { headers: { "x-request-id": "abc-123" } });
