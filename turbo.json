@@ -30,6 +30,12 @@
     "dev": {
       "cache": false,
       "persistent": true
+    },
+    "test:e2e": {
+      "dependsOn": ["build"],
+      "cache": false,
+      "env": ["CI"],
+      "passThroughEnv": ["PLAYWRIGHT_*"]
     }
   }
 }

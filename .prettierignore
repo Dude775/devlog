@@ -6,3 +6,5 @@ dist
 coverage
 pnpm-lock.yaml
 apps/web/public/static
+playwright-report
+test-results
