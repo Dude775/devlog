@@ -5,7 +5,7 @@ name: devlog
 
 services:
   postgres:
-    image: postgres:16-alpine
+    image: ${POSTGRES_IMAGE:-postgres:16-alpine}
     restart: unless-stopped
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-devlog}
@@ -21,30 +21,61 @@ services:
       timeout: 3s
       retries: 10
 
-  api:
+  # One-shot job: applies drizzle/ migrations, then exits. api starts only if it succeeds.
+  migrate:
+    image: devlog-api:local
     build:
       context: ..
       dockerfile: infra/docker/api.Dockerfile
+      args:
+        NODE_IMAGE: ${NODE_IMAGE:-node:20-alpine}
+    command: ["node", "dist/migrate.js"]
+    restart: "no"
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgres://${POSTGRES_USER:-devlog}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-devlog}
+      VIEW_HASH_SALT: ${VIEW_HASH_SALT:?set VIEW_HASH_SALT in infra/.env}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      disable: true
+    read_only: true
+    security_opt: ["no-new-privileges:true"]
+
+  api:
+    image: devlog-api:local
+    build:
+      context: ..
+      dockerfile: infra/docker/api.Dockerfile
+      args:
+        NODE_IMAGE: ${NODE_IMAGE:-node:20-alpine}
     restart: unless-stopped
     environment:
       NODE_ENV: production
       PORT: 4000
       DATABASE_URL: postgres://${POSTGRES_USER:-devlog}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-devlog}
-      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000}
+      WEB_ORIGIN: ${WEB_ORIGIN:-http://localhost:3000}
+      VIEW_HASH_SALT: ${VIEW_HASH_SALT:?set VIEW_HASH_SALT in infra/.env}
+      ADMIN_API_KEY: ${ADMIN_API_KEY:-}
+      TRUST_PROXY: "false"
     ports:
       - "127.0.0.1:4000:4000"
     depends_on:
-      postgres:
-        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
     read_only: true
     security_opt: ["no-new-privileges:true"]
 
   web:
+    image: devlog-web:local
     build:
       context: ..
       dockerfile: infra/docker/web.Dockerfile
       args:
+        NODE_IMAGE: ${NODE_IMAGE:-node:20-alpine}
         NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-http://localhost:3000}
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:4000}
     restart: unless-stopped
     environment:
       API_URL: http://api:4000

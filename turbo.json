@@ -10,6 +10,12 @@
       "outputs": ["dist/**", ".next/**", "!.next/cache/**", ".velite/**", "public/static/**"],
       "env": ["NEXT_PUBLIC_*", "API_URL", "SITE_URL"]
     },
+    "@devlog/web#build": {
+      "dependsOn": ["^build", "@devlog/web#lint", "@devlog/web#typecheck"],
+      "inputs": ["$TURBO_DEFAULT$", "!**/*.test.ts", "!README.md"],
+      "outputs": [".next/**", "!.next/cache/**", ".velite/**", "public/static/**"],
+      "env": ["NEXT_PUBLIC_*", "API_URL", "SITE_URL"]
+    },
     "lint": {
       "dependsOn": ["^build"]
     },
@@ -18,7 +24,8 @@
     },
     "test": {
       "dependsOn": ["^build"],
-      "outputs": ["coverage/**"]
+      "outputs": ["coverage/**"],
+      "env": ["TEST_DATABASE_URL"]
     },
     "dev": {
       "cache": false,
