@@ -1,0 +1,73 @@
+---
+title: "Inside devlog: a monorepo that treats a blog like a product"
+slug: devlog-monorepo-architecture
+date: 2026-11-04
+description: Why a personal blog gets a typed API, strict layering and a CI matrix, and how the pieces fit together.
+category: devops
+tags: [monorepo, turborepo, architecture, ci]
+project: devlog
+featured: true
+---
+
+A blog is the smallest system that still has every real-world concern: content, a public API,
+a database, deploys and observability. That makes it a good place to practice doing them properly.
+
+<Callout title="Placeholder post">
+  This post exists to exercise the design system. The full write-up lands in Phase 4.
+</Callout>
+
+## The shape of the repo
+
+Two apps and two packages, wired by pnpm workspaces and Turborepo:
+
+```txt title="repo layout"
+apps/web          Next.js 15, RSC, MDX via velite
+apps/api          Hono + Drizzle + PostgreSQL
+packages/shared   zod schemas + typed client
+packages/config   eslint, tsconfig, prettier
+```
+
+### One contract, two runtimes
+
+Every response shape is a zod schema in `@devlog/shared`. The API validates what it sends and the
+client validates what it receives, so drift fails loudly instead of rendering `undefined`.
+
+```ts title="packages/shared/src/schemas/health.ts"
+import { z } from "zod";
+
+export const healthSchema = z.object({
+  status: z.literal("ok"),
+  version: z.string(),
+  uptime: z.number().nonnegative(),
+});
+
+export type Health = z.infer<typeof healthSchema>;
+```
+
+## Layering in the API
+
+Routes parse input, services hold rules, repositories talk to the database. Nothing skips a layer.
+
+```ts title="apps/api/src/app.ts"
+export function createApp(deps: AppDeps) {
+  const app = new Hono();
+  app.route("/health", healthRoutes(deps.healthService));
+  return app;
+}
+```
+
+## CI as a matrix
+
+Format runs once; lint, typecheck, test and build run per app with a shared Turbo cache.
+
+```yaml title=".github/workflows/ci.yml"
+strategy:
+  matrix:
+    app: [web, api]
+steps:
+  - run: pnpm turbo run lint typecheck test build --filter=@devlog/${{ matrix.app }}...
+```
+
+## What is next
+
+Design system first, then views and likes through the API, then SEO and real content.

@@ -1,0 +1,7 @@
+name: devlog
+slug: devlog
+summary: Monorepo tech blog with a typed Hono API, Postgres and a Next.js 15 frontend, shipped through Docker and CI.
+stack: [Next.js 15, TypeScript, Hono, PostgreSQL, Drizzle, Turborepo, Docker, GitHub Actions]
+repo: https://github.com/Dude775/devlog
+featured: true
+order: 1
