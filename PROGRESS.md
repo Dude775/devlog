@@ -18,11 +18,20 @@ Legend: `[x]` done, `[ ]` open. Update in the same commit that completes an item
 
 ## Phase 2: Frontend design
 
-- [ ] Design tokens (Tailwind v4 `@theme`), typography scale, dark/light toggle without FOUC
-- [ ] Layout shell: header, nav, footer, skip link, responsive container
-- [ ] Pages: home (hero + latest posts + featured projects), blog index, post page, projects, about
-- [ ] MDX components: code blocks with syntax highlighting (shiki/rehype-pretty-code), callouts, images
-- [ ] Accessibility pass (WCAG 2.1 AA), Lighthouse >= 95 on all categories
+Direction: "terminal meets editorial". Dark-first, cyan `#22d3ee` accent, grid + noise backdrop. Inter / JetBrains Mono / Heebo.
+Portfolio (https://system-portfolio.vercel.app) owns project detail; this site links to it and to repos (no `/projects/[slug]`).
+
+- [x] Design tokens (CSS vars mapped via Tailwind v4 `@theme inline`), fluid type scale, dark/light toggle without FOUC (next-themes)
+- [x] Design system `src/components/ui`: Button, Card, Badge, Tag, Container, Section, Prose, CodeBlock (shiki dual theme, filename header, copy)
+- [x] Layout shell: sticky glass header (Portfolio ↗ link), mobile menu, footer (GitHub/LinkedIn/email), skip link, grid/noise backdrop
+- [x] Content model: velite `posts` (`category`, `project`, `dir`, `featured`, toc, reading time) + `projects` (YAML); dangling `project` refs fail the build
+- [x] Pages: `/` (terminal hero, featured posts/projects, categories), `/blog` (category + tag filters synced to URL), `/blog/[slug]` (progress bar, auto ToC, reading time, prev/next, related project), `/projects`, `/categories/[category]`, `/about`, 404
+- [x] Cmd/Ctrl+K command palette (cmdk): posts, projects, repos, pages, categories, theme action
+- [x] RTL posts (`dir: rtl`) render right-to-left with Heebo; code blocks stay LTR
+- [x] Motion: framer-motion (LazyMotion) section reveals + page transitions, `MotionConfig reducedMotion="user"`; no entrance on first paint (LCP)
+- [x] MDX components: CodeBlock, Callout, smart links
+- [x] Placeholder content: 2 posts (EN + HE/RTL), 1 project (devlog)
+- [ ] Accessibility audit (axe) + Lighthouse >= 95 on all categories (not yet measured)
 - [ ] Component tests (Vitest + Testing Library) and Playwright smoke test
 
 ## Phase 3: Backend features

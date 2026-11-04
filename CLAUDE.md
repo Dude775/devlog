@@ -25,8 +25,13 @@ The repo is itself a portfolio piece: architecture, repo hygiene and CI matter a
 ```
 apps/
   web/                     Next.js app (@devlog/web)
-    content/posts/*.mdx    Blog posts (velite collection "posts")
+    content/posts/*.mdx    Blog posts (velite "posts"; frontmatter: category, tags, project, dir, featured)
+    content/projects/*.yml Projects (velite "projects"); detail lives on the portfolio
     src/app/               Routes (RSC by default)
+    src/components/ui/     Design system primitives (Button, Card, Badge, Tag, Container, Section, Prose, CodeBlock)
+    src/components/*/      Feature components (layout, blog, projects, home, command, mdx, motion)
+    src/config/            site.ts (identity, links, nav), categories.ts (allowed category slugs)
+    src/lib/content.ts     Typed queries over velite output; the only place pages read content
     src/lib/api.ts         Server-only typed API client factory
     src/env.ts             zod-validated env (publicEnv, getServerEnv)
     velite.config.ts       Content schema
@@ -56,7 +61,9 @@ docs/ARCHITECTURE.md       Diagrams + boundaries
 3. **Contracts live in `@devlog/shared/schemas`.** Every request/response shape is a zod schema; types are `z.infer`. API responses and client parsing use the same schema.
 4. **Dependency injection over singletons.** Factories (`createXService({ deps })`) wired in `apps/api/src/index.ts`; `createApp()` stays pure so tests use `app.request()` with fakes.
 5. **Static content (MDX) is build-time** via velite. Dynamic data (views, likes, comments) is API-backed.
-6. `@devlog/shared` must stay runtime-agnostic (no Node or DOM-only APIs, no React).
+6. **Portfolio owns project detail.** https://system-portfolio.vercel.app is canonical; this site links out, never duplicates case studies. No `/projects/[slug]`.
+7. **Design tokens only.** Colors come from CSS vars in `globals.css` (`bg`, `surface`, `fg`, `muted`, `accent`, ...); no raw palette colors in components (status tones like the `warn` Callout excepted). Motion must respect `prefers-reduced-motion`.
+8. `@devlog/shared` must stay runtime-agnostic (no Node or DOM-only APIs, no React).
 
 ## Conventions
 
