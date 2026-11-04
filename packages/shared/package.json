@@ -1,0 +1,26 @@
+{
+  "name": "@devlog/shared",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/index.ts",
+    "./schemas": "./src/schemas/index.ts",
+    "./client": "./src/client/index.ts"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "zod": "^4.1.12"
+  },
+  "devDependencies": {
+    "@devlog/config": "workspace:*",
+    "eslint": "^9.39.1",
+    "typescript": "~5.9.3",
+    "vitest": "^3.2.4"
+  }
+}
