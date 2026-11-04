@@ -1,0 +1,43 @@
+version: 2
+
+updates:
+  # pnpm workspace (root lockfile covers apps/* and packages/*).
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 10
+    commit-message:
+      prefix: build
+      include: scope
+    groups:
+      types:
+        patterns: ["@types/*"]
+      lint:
+        patterns:
+          ["eslint*", "@eslint/*", "typescript-eslint", "@next/eslint-plugin-next", "globals"]
+      next-react:
+        patterns: ["next", "react", "react-dom", "@types/react", "@types/react-dom"]
+      minor-and-patch:
+        update-types: [minor, patch]
+    ignore:
+      # Pinned in CLAUDE.md: TS 7 native compiler breaks the toolchain; ESLint 10 awaits plugin support.
+      - dependency-name: typescript
+        versions: [">=6"]
+      - dependency-name: eslint
+        versions: [">=10"]
+      # Node 20 runtime; keep types on the same major.
+      - dependency-name: "@types/node"
+        update-types: [version-update:semver-major]
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    commit-message:
+      prefix: ci
+    groups:
+      actions:
+        patterns: ["*"]
