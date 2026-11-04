@@ -32,7 +32,8 @@ Portfolio (https://system-portfolio.vercel.app) owns project detail; this site l
 - [x] MDX components: CodeBlock, Callout, smart links
 - [x] Placeholder content: 2 posts (EN + HE/RTL), 1 project (devlog)
 - [ ] Accessibility audit (axe) + Lighthouse >= 95 on all categories (not yet measured)
-- [ ] Component tests (Vitest + Testing Library) and Playwright smoke test
+- [x] Playwright smoke test (done in Phase 5)
+- [ ] Component tests (Vitest + Testing Library)
 
 ## Phase 3: Backend features
 
@@ -75,9 +76,22 @@ Portfolio (https://system-portfolio.vercel.app) owns project detail; this site l
 
 ## Phase 5: Hardening + docs
 
-- [ ] Security headers/CSP for web, CORS review, dependency audit + Renovate/Dependabot
-- [ ] Image scanning (Trivy) and SBOM in CI; push images to GHCR on `main`
-- [ ] Deployment target documented (e.g. AWS ECS Fargate or Lightsail) with IaC (Terraform)
-- [ ] Observability: health/readiness probes wired, uptime check, error tracking
-- [ ] Backup/restore runbook for Postgres
-- [ ] README with badges, screenshots, architecture summary; ADRs in `docs/adr/`
+- [x] Runtime on Node 22 everywhere (`.nvmrc`, engines, Docker, tsup, `@types/node`): `mermaid@12` needs `>=22.12` and broke `pnpm install` on Node 20 (EOL); see `docs/adr/0001-node-22-runtime.md`
+- [x] Playwright smoke tests (`apps/web/e2e`): home, post (incl. Mermaid), projects, 404, Cmd/Ctrl+K navigation; standalone server with the API down; fail on page errors and CSP violations
+- [x] CI: `e2e` job (Chromium, report artifact on failure); Docker job for web + api after `verify` + `e2e`; push to GHCR on `main` with `GITHUB_TOKEN`, tags `latest` + `sha-<sha>`, SBOM + max provenance
+- [x] Dependabot: weekly grouped npm + GitHub Actions updates; respects pinned TypeScript < 6, ESLint < 10, `@types/node` major
+- [x] CodeQL: `security-extended` for TypeScript and GitHub Actions on PRs, `main` and weekly
+- [x] Web security headers (`src/config/security-headers.ts`): CSP (API origin in `connect-src`, `frame-ancestors 'none'`, `upgrade-insecure-requests` on https), HSTS preload, nosniff, `X-Frame-Options`, Referrer-Policy, Permissions-Policy, COOP
+- [x] API helmet-equivalent: Hono `secureHeaders` with `default-src 'none'` CSP, HSTS, DENY framing, `no-referrer`, deny-all Permissions-Policy (route test); CORS reviewed (exact `WEB_ORIGIN` list, no credentials)
+- [x] `docs/DEPLOYMENT.md`: Vercel (web), Render Docker (api), Neon (Postgres), env tables per app, CORS loop, GHCR images, rollback
+- [x] README portfolio showcase: badges, screenshot placeholder, architecture diagram, stack table, 3-command local dev (`pnpm dev:setup`), folder map, decisions (monorepo, Hono, MDX-in-git); MIT `LICENSE`
+- [x] Final pass: dead exports and unused `ui/index.ts` barrel removed; lint, typecheck, unit + Postgres integration tests, build, e2e, format, both Docker images and the compose stack verified green
+
+## Backlog (not scheduled)
+
+- [ ] Image scanning (Trivy) gate in CI (SBOM is already attached to pushed images)
+- [ ] IaC (Terraform) for the hosting setup in `docs/DEPLOYMENT.md`
+- [ ] Observability: uptime check on `/health/ready`, error tracking (e.g. Sentry)
+- [ ] Postgres backup/restore runbook (Neon PITR + branch restore drill)
+- [ ] Real home page screenshot in `docs/assets/home.png` (README placeholder)
+- [ ] CSP nonces (requires dynamic rendering; see DEPLOYMENT.md trade-off)

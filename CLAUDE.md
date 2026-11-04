@@ -9,16 +9,16 @@ The repo is itself a portfolio piece: architecture, repo hygiene and CI matter a
 
 ## Stack (fixed, do not change without an ADR in `docs/`)
 
-| Area     | Choice                                                                    |
-| -------- | ------------------------------------------------------------------------- |
-| Monorepo | pnpm 10 workspaces + Turborepo 2                                          |
-| Web      | Next.js 15 App Router, React 19, RSC, TypeScript strict, Tailwind CSS v4  |
-| Content  | MDX via velite (fallback: next-mdx-remote)                                |
-| API      | Hono on Node 20, TypeScript, Drizzle ORM, PostgreSQL 16, zod              |
-| Shared   | `@devlog/shared`: zod schemas, inferred types, typed API client           |
-| Config   | `@devlog/config`: ESLint 9 flat config, tsconfig presets, Prettier        |
-| Infra    | Docker multi-stage non-root images, docker compose (postgres + api + web) |
-| CI       | GitHub Actions: format, then per-app matrix lint/typecheck/test/build     |
+| Area     | Choice                                                                        |
+| -------- | ----------------------------------------------------------------------------- |
+| Monorepo | pnpm 10 workspaces + Turborepo 2                                              |
+| Web      | Next.js 15 App Router, React 19, RSC, TypeScript strict, Tailwind CSS v4      |
+| Content  | MDX via velite (fallback: next-mdx-remote)                                    |
+| API      | Hono on Node 22, TypeScript, Drizzle ORM, PostgreSQL 16, zod                  |
+| Shared   | `@devlog/shared`: zod schemas, inferred types, typed API client               |
+| Config   | `@devlog/config`: ESLint 9 flat config, tsconfig presets, Prettier            |
+| Infra    | Docker multi-stage non-root images, docker compose (postgres + api + web)     |
+| CI       | GitHub Actions: format, matrix verify, Playwright e2e, Docker -> GHCR, CodeQL |
 
 ## Folder map
 
@@ -32,7 +32,8 @@ apps/
     src/app/               Routes (RSC by default)
     src/components/ui/     Design system primitives (Button, Card, Badge, Tag, Container, Section, Prose, CodeBlock)
     src/components/*/      Feature components (layout, blog, projects, home, command, mdx, motion)
-    src/config/            site.ts (identity, links, nav), categories.ts (allowed category slugs)
+    src/config/            site.ts (identity, links, nav), categories.ts (allowed category slugs),
+                           security-headers.ts (CSP/HSTS/etc., applied in next.config.ts headers())
     src/lib/content.ts     Typed queries over velite output; the only place pages read content (drops drafts in prod)
     src/lib/seo.ts         pageMetadata/postMetadata, canonical + RSS alternates, JSON-LD builders
     src/lib/og.tsx         next/og frame + local font loading (@fontsource woff); mirrors dark tokens
@@ -43,6 +44,8 @@ apps/
     src/components/forms/  NewsletterForm (footer), ContactForm (/contact), honeypot field
     src/env.ts             zod-validated env (publicEnv, getServerEnv)
     velite.config.ts       Content schema
+    e2e/*.spec.ts          Playwright smoke tests (standalone server, API down; fail on CSP violations)
+    playwright.config.ts   Playwright config (port 3100)
   api/                     Hono API (@devlog/api)
     src/index.ts           Process entry: env, logger, DB, server, graceful shutdown
     src/migrate.ts         One-shot migration entry (dist/migrate.js, compose `migrate` job)
@@ -63,8 +66,13 @@ packages/
 infra/
   docker/*.Dockerfile      Multi-stage, turbo prune, non-root runtime
   docker-compose.yml       Local full stack
+scripts/dev-setup.mjs      `pnpm dev:setup`: apps/api/.env, Postgres via compose, migrations
 docs/ARCHITECTURE.md       Diagrams + boundaries
-.github/workflows/ci.yml   CI
+docs/adr/                  Architecture decision records (stack changes need one)
+docs/DEPLOYMENT.md         Vercel (web) + Render Docker (api) + Neon (Postgres), env tables, rollback
+.github/workflows/ci.yml   CI: format, verify matrix, e2e, docker (push to GHCR on main)
+.github/workflows/codeql.yml  CodeQL security-extended (TS + Actions)
+.github/dependabot.yml     Weekly grouped npm + Actions updates (respects pinned majors)
 ```
 
 ## Architecture rules (enforced in review)
@@ -86,6 +94,7 @@ docs/ARCHITECTURE.md       Diagrams + boundaries
 - **Naming:** files `kebab-case`; layer suffixes `*.routes.ts`, `*.service.ts`, `*.repository.ts`; tests `*.test.ts` next to the source; React components `PascalCase` exports; zod schemas `camelCaseSchema`, types `PascalCase`.
 - **Imports:** `import { type X }` for types (lint enforced). Web uses `@/` alias.
 - **Errors:** API errors use `apiErrorSchema` shape `{ error: { code, message } }`. Throw `HttpError` (or let `parseInput` throw) and `app.onError` renders it; never `c.json` an error by hand.
+- **Security headers:** web headers live in `src/config/security-headers.ts`; a new third-party origin (script, image, API) must be added to the CSP there, and the e2e suite fails on CSP violations. API headers are configured in `createApp()`.
 - **Privacy:** never persist or log raw IPs. Visitor identity is `VisitorHasher` output only.
 - **Logging:** use `c.get("logger")` (request-scoped pino child with `reqId`), never `console.*` in the API.
 - **Web + API failures:** API-backed widgets render `null` on any failure; forms show a calm fallback with the email address.
@@ -96,8 +105,10 @@ docs/ARCHITECTURE.md       Diagrams + boundaries
 
 ```bash
 pnpm install                    # install all workspaces
-pnpm dev                        # web :3000 + api :4000 (api needs DATABASE_URL, see apps/api/.env.example)
+pnpm dev:setup                  # once: apps/api/.env, Postgres in Docker, migrations
+pnpm dev                        # web :3000 + api :4000
 pnpm lint | typecheck | test | build
+pnpm test:e2e                   # build web + Playwright smoke (CI: playwright install --with-deps chromium)
 pnpm format                     # write; format:check in CI
 pnpm --filter @devlog/api db:generate   # create migration from src/db/schema.ts
 pnpm --filter @devlog/api db:migrate    # apply migrations (src/migrate.ts)
@@ -105,13 +116,13 @@ TEST_DATABASE_URL=postgres://... pnpm --filter @devlog/api test   # include Post
 cp infra/.env.example infra/.env && docker compose -f infra/docker-compose.yml --env-file infra/.env up --build
 ```
 
-Docker base images are overridable via `infra/.env`: `NODE_IMAGE=mirror.gcr.io/library/node:20-alpine`, `POSTGRES_IMAGE=mirror.gcr.io/library/postgres:16-alpine` (useful when Docker Hub rate-limits).
+Docker base images are overridable via `infra/.env`: `NODE_IMAGE=mirror.gcr.io/library/node:22-alpine`, `POSTGRES_IMAGE=mirror.gcr.io/library/postgres:16-alpine` (useful when Docker Hub rate-limits).
 
 ## How to continue (rules for future sessions)
 
 1. Start by reading `PROGRESS.md`; pick the first unchecked item of the current phase. Do not start a later phase while the current one has open items unless asked.
 2. Work on the designated branch; keep commits small and conventional.
-3. Before every commit: `pnpm lint && pnpm typecheck && pnpm test && pnpm build && pnpm format:check` must pass. Never disable a lint rule or skip a test to get green; fix the cause.
+3. Before every commit: `pnpm lint && pnpm typecheck && pnpm test && pnpm build && pnpm format:check` must pass (plus `pnpm test:e2e` for web UI, routing or header changes). Never disable a lint rule or skip a test to get green; fix the cause.
 4. New API feature checklist: schema in `@devlog/shared/schemas` -> repository -> service -> route -> client method in `@devlog/shared/client` -> `app.test.ts`-style test with fakes -> web consumer.
 5. DB changes: edit `src/db/schema.ts`, run `db:generate`, commit the SQL in `apps/api/drizzle/`.
 6. Update `PROGRESS.md` checkboxes in the same commit that completes the item. Update `docs/ARCHITECTURE.md` when boundaries change.
