@@ -1,0 +1,75 @@
+---
+title: "From ERP to DevOps: why I switched"
+slug: from-erp-to-devops
+date: 2026-11-01
+category: career
+tags: [career, erp, sap-b1, automation, aws]
+summary: ERP work taught me integrations, data and change control. It also showed me that the part I liked most was the plumbing. This is why I moved to DevOps and what carried over.
+draft: false
+---
+
+I did not leave ERP because it was boring. I left because the most interesting work kept
+happening _around_ the ERP: the scheduled jobs, the integrations, the scripts that moved data
+between systems at 2 a.m., and the outages when one of them silently stopped.
+
+That work has a name. It is operations engineering, and DevOps is where it is treated as a
+first-class discipline instead of a side effect.
+
+## What ERP work actually looks like
+
+Working on SAP Business One is less about screens and more about systems:
+
+- **Integrations.** Orders, stock, invoices and price lists flow in and out through the
+  DI/Service Layer, SQL and flat files. Every integration is a contract that can drift.
+- **Data migrations.** Moving master data and open documents between companies or versions is
+  a one-shot deploy with no rollback button. You learn to rehearse.
+- **Scheduled automation.** PowerShell and Python jobs on a Windows server, triggered by Task
+  Scheduler, with logging that is usually an afterthought.
+- **Change control.** A wrong posting period or a broken approval procedure hits finance on
+  the same day. Production discipline is not optional.
+
+None of that is "configure a form". It is distributed systems with accountants as users.
+
+## The pattern I kept hitting
+
+The failures were rarely in the ERP itself. They were in the glue:
+
+1. A script ran on one machine, under one user, with credentials in a config file.
+2. Nobody knew it existed until it failed.
+3. The fix was a manual rerun, and the root cause stayed.
+
+Every one of those is a solved problem in DevOps: version control, CI, secrets management,
+idempotent jobs, health checks and alerting. I was solving them badly, by hand, one server at a
+time. I wanted to solve them properly.
+
+## What carried over
+
+More than I expected:
+
+| ERP habit                        | DevOps equivalent                              |
+| -------------------------------- | ---------------------------------------------- |
+| Rehearse the migration on a copy | Staging environments, blue/green, dry runs     |
+| Never post into a closed period  | Guardrails: policies, protected branches       |
+| Reconcile after every import     | Verification steps and smoke tests in the pipe |
+| Document who approves what       | Code review, CODEOWNERS, change records        |
+| "Which job wrote this row?"      | Structured logs with request IDs, tracing      |
+
+The mindset is the same: data and money are on the line, so every change must be reversible or
+verified. The tooling is just far better.
+
+## What I had to learn from scratch
+
+- **Linux and containers** as the default runtime, not Windows services.
+- **Cloud primitives.** I studied for and passed AWS Solutions Architect Associate to get the
+  networking, IAM and failure-domain model right, not just the service names.
+- **Infrastructure as code.** Clicking through a console does not scale or review well.
+- **CI/CD as a product.** A pipeline is software with its own tests, caching and failure modes.
+
+## Why this blog exists
+
+Writing forces precision. Each post here documents something I built or broke, with the
+trade-offs spelled out. The first real system is this site itself: a monorepo with a typed API,
+a database, Docker and CI, built the way I would build it at work.
+
+If you are coming from ERP, BI or IT operations: you are closer to DevOps than the job titles
+suggest. Start by putting your scripts in Git and running them from a pipeline.

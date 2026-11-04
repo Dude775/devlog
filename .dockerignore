@@ -1,0 +1,16 @@
+**/node_modules
+**/.next
+**/.velite
+**/dist
+**/.turbo
+**/coverage
+**/.env
+**/.env.*
+!**/.env.example
+.git
+.github
+docs
+infra
+apps/web/public/static
+**/playwright-report
+**/test-results

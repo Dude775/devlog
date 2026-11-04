@@ -1,0 +1,22 @@
+title: devlog
+slug: devlog
+summary: This site. pnpm + Turborepo monorepo with a Next.js 15 frontend, a layered Hono API on PostgreSQL, shared zod contracts, Docker and a CI matrix.
+stack:
+  [
+    Next.js 15,
+    React 19,
+    TypeScript,
+    Tailwind CSS v4,
+    velite (MDX),
+    Hono,
+    PostgreSQL 16,
+    Drizzle ORM,
+    zod,
+    Turborepo,
+    Docker,
+    GitHub Actions,
+  ]
+repo: https://github.com/Dude775/devlog
+portfolio_url: https://system-portfolio.vercel.app
+status: active
+featured: true
