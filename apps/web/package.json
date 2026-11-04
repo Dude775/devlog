@@ -7,9 +7,9 @@
     "dev": "next dev --port 3000",
     "build": "next build",
     "start": "next start --port 3000",
-    "content": "velite build",
-    "lint": "velite build && next typegen && eslint .",
-    "typecheck": "velite build && next typegen && tsc --noEmit",
+    "content": "velite build && next typegen",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
     "test:e2e": "playwright test"
   },
   "dependencies": {

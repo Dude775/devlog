@@ -11,10 +11,20 @@
       "env": ["NEXT_PUBLIC_*", "API_URL", "SITE_URL"]
     },
     "@devlog/web#build": {
-      "dependsOn": ["^build", "@devlog/web#lint", "@devlog/web#typecheck"],
+      "dependsOn": ["^build", "@devlog/web#content", "@devlog/web#lint", "@devlog/web#typecheck"],
       "inputs": ["$TURBO_DEFAULT$", "!**/*.test.ts", "!README.md"],
       "outputs": [".next/**", "!.next/cache/**", ".velite/**", "public/static/**"],
       "env": ["NEXT_PUBLIC_*", "API_URL", "SITE_URL"]
+    },
+    "@devlog/web#content": {
+      "dependsOn": ["^build"],
+      "outputs": [".velite/**", "public/static/**", ".next/types/**"]
+    },
+    "@devlog/web#lint": {
+      "dependsOn": ["^build", "@devlog/web#content"]
+    },
+    "@devlog/web#typecheck": {
+      "dependsOn": ["^build", "@devlog/web#content"]
     },
     "lint": {
       "dependsOn": ["^build"]
