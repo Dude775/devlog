@@ -27,7 +27,7 @@ updates:
         versions: [">=6"]
       - dependency-name: eslint
         versions: [">=10"]
-      # Node 20 runtime; keep types on the same major.
+      # Node 22 runtime; keep types on the same major.
       - dependency-name: "@types/node"
         update-types: [version-update:semver-major]
 

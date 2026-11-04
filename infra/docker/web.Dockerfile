@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1.7
 # Build context: repo root.  docker build -f infra/docker/web.Dockerfile .
-# Override to use a registry mirror, e.g. mirror.gcr.io/library/node:20-alpine
-ARG NODE_IMAGE=node:20-alpine
+# Override to use a registry mirror, e.g. mirror.gcr.io/library/node:22-alpine
+ARG NODE_IMAGE=node:22-alpine
 
 FROM ${NODE_IMAGE} AS base
 ENV PNPM_HOME=/pnpm PATH=/pnpm:$PATH COREPACK_ENABLE_DOWNLOAD_PROMPT=0 NEXT_TELEMETRY_DISABLED=1

@@ -20,7 +20,7 @@ Two apps and two packages, wired by pnpm workspaces and Turborepo:
 
 ```txt title="repo layout"
 apps/web          Next.js 15 (App Router, RSC), MDX via velite
-apps/api          Hono on Node 20, Drizzle ORM, PostgreSQL 16
+apps/api          Hono on Node 22, Drizzle ORM, PostgreSQL 16
 packages/shared   zod schemas + typed API client
 packages/config   ESLint flat config, tsconfig presets, Prettier
 infra/            Dockerfiles + docker compose
@@ -40,7 +40,7 @@ flowchart TB
         pages --> islands
     end
 
-    subgraph api["apps/api (Hono, Node 20)"]
+    subgraph api["apps/api (Hono, Node 22)"]
         routes["routes/"] --> services["services/"] --> repos["repositories/"] --> db["db/ (Drizzle)"]
     end
 

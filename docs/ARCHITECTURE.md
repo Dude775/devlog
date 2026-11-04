@@ -16,7 +16,7 @@ flowchart LR
         pages --> islands
     end
 
-    subgraph api["apps/api (Hono, Node 20)"]
+    subgraph api["apps/api (Hono, Node 22)"]
         routes["routes/"] --> services["services/"] --> repos["repositories/"] --> db["db/ (Drizzle)"]
     end
 
@@ -137,7 +137,7 @@ Both Dockerfiles follow the same pattern:
 
 1. `pruner`: `turbo prune <app> --docker` emits only the app's workspace graph and a pruned lockfile.
 2. `builder`: install from `out/json` (cache-friendly layer), copy `out/full`, `turbo build`.
-3. `runner`: clean `node:20-alpine`, runs as `node` (uid 1000), `HEALTHCHECK` built in.
+3. `runner`: clean `node:22-alpine`, runs as `node` (uid 1000), `HEALTHCHECK` built in.
    - web: Next.js `output: "standalone"` (no `node_modules` install).
    - api: `pnpm deploy --prod` (production deps only) + tsup bundle with `@devlog/*` inlined.
 

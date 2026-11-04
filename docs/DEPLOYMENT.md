@@ -109,7 +109,7 @@ Notes:
 | Install Command  | default (Vercel detects pnpm from the root `pnpm-lock.yaml` + `packageManager`) |
 | Build Command    | default `next build` (velite runs inside `next.config.ts`)                      |
 | Output           | default (`.next`)                                                               |
-| Node.js Version  | 20.x if offered, else 22.x (the app supports `>=20.11`)                         |
+| Node.js Version  | 22.x (`engines.node` is `>=22.12`)                                              |
 
 3. Environment variables: see [web env table](#web-vercel). Set them for **Production** before the first
    deploy: `NEXT_PUBLIC_*` values are inlined at build time, so changing them requires a redeploy.
