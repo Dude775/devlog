@@ -6,6 +6,7 @@ import { type AnchorHTMLAttributes } from "react";
 import * as runtime from "react/jsx-runtime";
 import { CodeBlock } from "@/components/ui/code-block";
 import { Callout } from "./callout";
+import { Mermaid } from "./mermaid";
 
 function MdxLink({ href = "", children, className, id }: AnchorHTMLAttributes<HTMLAnchorElement>) {
   const props = { ...(className ? { className } : {}), ...(id ? { id } : {}) };
@@ -34,6 +35,7 @@ const components: MDXComponents = {
   a: MdxLink,
   pre: CodeBlock,
   Callout,
+  Mermaid,
 };
 
 /** Evaluates velite's build-time compiled MDX (function-body) on the server. */
