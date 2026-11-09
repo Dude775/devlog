@@ -33,7 +33,7 @@
     "@types/node": "^22.20.5",
     "drizzle-kit": "^0.31.5",
     "eslint": "^9.39.1",
-    "tsup": "^8.5.0",
+    "tsup": "^9.0.0",
     "tsx": "^4.20.6",
     "typescript": "~5.9.3",
     "vitest": "^3.2.4"
