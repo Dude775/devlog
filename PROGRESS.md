@@ -95,3 +95,19 @@ Portfolio (https://system-portfolio.vercel.app) owns project detail; this site l
 - [ ] Postgres backup/restore runbook (Neon PITR + branch restore drill)
 - [ ] Real home page screenshot in `docs/assets/home.png` (README placeholder)
 - [ ] CSP nonces (requires dynamic rendering; see DEPLOYMENT.md trade-off)
+
+## Phase 6: Preview deploy (in progress)
+
+Goal: a real Vercel Preview URL for the content layer (web only, API not connected), browser-verified.
+
+- [x] 2026-11-18 local checks on Windows (Node 24.18, pnpm 10.28, commit 719c590): install (frozen lockfile), lint, typecheck, test (shared 8, api 51 + 5 skipped integration) green
+- [x] `format:check` fails locally only because of CRLF checkout (`core.autocrlf=true`); `prettier --check --end-of-line auto .` is clean, CI on Linux unaffected
+- [ ] `pnpm build` fails locally: `output: "standalone"` needs symlinks, Windows returns EPERM (needs Developer Mode or WSL with Node >= 22.12). Not a code issue; Vercel (Linux) build passes
+- [x] 2026-11-18 Vercel project `devlog` created (team david-zarkos-projects), Git-connected to `Dude775/devlog`, Root Directory `apps/web`, framework Next.js, Node 22.x
+- [x] First CLI deploy became **production** (Vercel makes a new project's first deploy production): https://devlog-flame.vercel.app (public, built without `NEXT_PUBLIC_SITE_URL`, so canonical/RSS/sitemap point to localhost:3000). Keep or remove: waiting for David
+- [x] `NEXT_PUBLIC_SITE_URL=https://devlog-flame.vercel.app` set for Preview + Production envs; preview deploy https://devlog-m4byqavqh-david-zarkos-projects.vercel.app (Vercel Authentication: opens only when logged in to Vercel)
+- [x] Browser QA (Playwright, desktop 970px + mobile 390px): home, post (Mermaid renders, 4 code blocks), `/rss.xml` (3 items, correct absolute links on preview), 16 internal routes 200, unknown route 404, no horizontal overflow on mobile
+- [x] 2026-11-18 favicon: `src/app/icon.svg` on branch `preview-fixes` (not pushed). Preview https://devlog-cosh3ejr0-david-zarkos-projects.vercel.app serves `<link rel=icon>` 200 image/svg+xml; direct `/favicon.ico` still 404 (browsers no longer request it)
+- [ ] Preview-only console error: Vercel toolbar script (vercel.live) blocked by our CSP. Not present on production
+- [ ] Open issues: API not deployed, `NEXT_PUBLIC_API_URL` defaults to `http://localhost:4000` so post pages log 2 failed requests (views, reactions) in the console; widgets render nothing as designed; contact/newsletter forms not connected
+- [ ] Note: Git-connected means a push to `main` now deploys production automatically
